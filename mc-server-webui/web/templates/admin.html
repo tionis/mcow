@@ -40,7 +40,8 @@
             data-description="{{.Description}}"
             data-bluemap="{{.BlueMapURL}}"
             data-modpack="{{.ModpackURL}}"
-            data-enabled="{{.IsEnabled}}">
+            data-enabled="{{.IsEnabled}}"
+            data-metadata='{{.Metadata | json}}'>
             Edit
           </button>
           <form action="/admin/servers/delete" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete {{.Name}}?');">
@@ -88,6 +89,11 @@
             <label for="addModpack" class="form-label">Modpack Download URL (Optional)</label>
             <input type="text" class="form-control" id="addModpack" name="modpack_url">
           </div>
+          <div class="mb-3">
+            <label class="form-label">Metadata (Extra Info)</label>
+            <div id="addMetadataContainer"></div>
+            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addMetadataRow('addMetadataContainer')">+ Add Property</button>
+          </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="addEnabled" name="is_enabled" checked>
             <label class="form-check-label" for="addEnabled">Enabled</label>
@@ -133,6 +139,11 @@
             <label for="editModpack" class="form-label">Modpack Download URL</label>
             <input type="text" class="form-control" id="editModpack" name="modpack_url">
           </div>
+          <div class="mb-3">
+            <label class="form-label">Metadata (Extra Info)</label>
+            <div id="editMetadataContainer"></div>
+            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addMetadataRow('editMetadataContainer')">+ Add Property</button>
+          </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="editEnabled" name="is_enabled">
             <label class="form-check-label" for="editEnabled">Enabled</label>
@@ -148,6 +159,18 @@
 </div>
 
 <script>
+  function addMetadataRow(containerId, key = '', value = '') {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'input-group mb-2';
+    div.innerHTML = `
+      <input type="text" class="form-control" name="meta_key" placeholder="Key" value="${key}">
+      <input type="text" class="form-control" name="meta_value" placeholder="Value" value="${value}">
+      <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">X</button>
+    `;
+    container.appendChild(div);
+  }
+
   // Populate Edit Modal
   var editModal = document.getElementById('editServerModal');
   editModal.addEventListener('show.bs.modal', function (event) {
@@ -160,6 +183,16 @@
     document.getElementById('editBlueMap').value = button.getAttribute('data-bluemap');
     document.getElementById('editModpack').value = button.getAttribute('data-modpack');
     document.getElementById('editEnabled').checked = button.getAttribute('data-enabled') === 'true';
+
+    // Populate metadata
+    const container = document.getElementById('editMetadataContainer');
+    container.innerHTML = '';
+    const metadata = JSON.parse(button.getAttribute('data-metadata'));
+    if (metadata) {
+      for (const [key, value] of Object.entries(metadata)) {
+        addMetadataRow('editMetadataContainer', key, value);
+      }
+    }
   });
 </script>
 {{end}}

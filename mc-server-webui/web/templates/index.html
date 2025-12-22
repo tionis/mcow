@@ -15,6 +15,14 @@
         </h6>
         <p class="card-text" id="motd-{{.Name}}">{{.Description}}</p>
         
+        {{if .Metadata}}
+        <div class="mb-3">
+          {{range $k, $v := .Metadata}}
+            <span class="badge bg-light text-dark border me-1 mb-1" title="{{$k}}">{{$k}}: {{$v}}</span>
+          {{end}}
+        </div>
+        {{end}}
+
         <div class="d-grid gap-2 d-md-block">
           {{if .BlueMapURL}}
           <a href="/{{.Name}}/map/" target="_blank" class="btn btn-outline-primary">View Map</a>

@@ -2,6 +2,7 @@ package web
 
 import (
 	"embed"
+	"encoding/json"
 	"html/template"
 	"mc-server-webui/auth"
 	"mc-server-webui/database"
@@ -69,13 +70,20 @@ func (h *WebHandler) Admin(w http.ResponseWriter, r *http.Request) {
 		UserEmail:     h.Auth.GetUserEmail(r),
 	}
 
-	tmpl, err := template.ParseFS(templateFS, "templates/base.html", "templates/admin.html")
+	funcMap := template.FuncMap{
+		"json": func(v interface{}) string {
+			b, _ := json.Marshal(v)
+			return string(b)
+		},
+	}
+
+	tmpl, err := template.New("base.html").Funcs(funcMap).ParseFS(templateFS, "templates/base.html", "templates/admin.html")
 	if err != nil {
 		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "base.html", data); err != nil {
+	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -94,6 +102,7 @@ func (h *WebHandler) HandleServerCreate(w http.ResponseWriter, r *http.Request) 
 		BlueMapURL:  r.FormValue("blue_map_url"),
 		ModpackURL:  r.FormValue("modpack_url"),
 		IsEnabled:   r.FormValue("is_enabled") == "on",
+		Metadata:    h.parseMetadata(r),
 	}
 
 	if err := h.Store.CreateServer(server); err != nil {
@@ -125,6 +134,7 @@ func (h *WebHandler) HandleServerUpdate(w http.ResponseWriter, r *http.Request) 
 		BlueMapURL:  r.FormValue("blue_map_url"),
 		ModpackURL:  r.FormValue("modpack_url"),
 		IsEnabled:   r.FormValue("is_enabled") == "on",
+		Metadata:    h.parseMetadata(r),
 	}
 
 	if err := h.Store.UpdateServer(server); err != nil {
@@ -133,6 +143,28 @@ func (h *WebHandler) HandleServerUpdate(w http.ResponseWriter, r *http.Request) 
 	}
 
 	http.Redirect(w, r, "/admin", http.StatusFound)
+}
+
+// parseMetadata helper to extract metadata from form
+func (h *WebHandler) parseMetadata(r *http.Request) map[string]string {
+	meta := make(map[string]string)
+	keys := r.Form["meta_key"]
+	values := r.Form["meta_value"]
+
+	// Ensure same length
+	count := len(keys)
+	if len(values) < count {
+		count = len(values)
+	}
+
+	for i := 0; i < count; i++ {
+		k := keys[i]
+		v := values[i]
+		if k != "" {
+			meta[k] = v
+		}
+	}
+	return meta
 }
 
 // HandleServerDelete handles deleting a server.
