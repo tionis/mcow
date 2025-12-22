@@ -17,8 +17,8 @@
         <th scope="col">#</th>
         <th scope="col">Name</th>
         <th scope="col">Address</th>
-        <th scope="col">BlueMap URL</th>
-        <th scope="col">Enabled</th>
+        <th scope="col">State</th>
+        <th scope="col">Show MOTD</th>
         <th scope="col">Actions</th>
       </tr>
     </thead>
@@ -28,9 +28,15 @@
         <td>{{.ID}}</td>
         <td>{{.Name}}</td>
         <td>{{.Address}}</td>
-        <td>{{if .BlueMapURL}}<a href="{{.BlueMapURL}}" target="_blank">Link</a>{{else}}-{{end}}</td>
-        <td>{{if .IsEnabled}}✅{{else}}❌{{end}}</td>
         <td>
+          {{if eq .State "online"}}<span class="badge bg-success">Online</span>{{end}}
+          {{if eq .State "offline"}}<span class="badge bg-secondary">Offline</span>{{end}}
+          {{if eq .State "planned"}}<span class="badge bg-info text-dark">Planned</span>{{end}}
+          {{if eq .State "maintenance"}}<span class="badge bg-warning text-dark">Maintenance</span>{{end}}
+        </td>
+        <td>{{if .ShowMOTD}}✅{{else}}❌{{end}}</td>
+        <td>
+          <a href="/admin/files/{{.Name}}" class="btn btn-sm btn-outline-info me-1">Files</a>
           <button class="btn btn-sm btn-outline-primary" 
             data-bs-toggle="modal" 
             data-bs-target="#editServerModal"
@@ -40,7 +46,8 @@
             data-description="{{.Description}}"
             data-bluemap="{{.BlueMapURL}}"
             data-modpack="{{.ModpackURL}}"
-            data-enabled="{{.IsEnabled}}"
+            data-state="{{.State}}"
+            data-showmotd="{{.ShowMOTD}}"
             data-metadata='{{.Metadata | json}}'>
             Edit
           </button>
@@ -74,29 +81,42 @@
             <input type="text" class="form-control" id="addName" name="name" required pattern="[a-zA-Z0-9_-]+" title="Alphanumeric, dashes, underscores only">
           </div>
           <div class="mb-3">
-            <label for="addAddress" class="form-label">Server Address (e.g., mc.example.com:25565)</label>
+            <label for="addAddress" class="form-label">Server Address</label>
             <input type="text" class="form-control" id="addAddress" name="address" required>
           </div>
           <div class="mb-3">
             <label for="addDescription" class="form-label">Description</label>
             <textarea class="form-control" id="addDescription" name="description" rows="2"></textarea>
           </div>
-          <div class="mb-3">
-            <label for="addBlueMap" class="form-label">BlueMap Backend URL (Optional)</label>
-            <input type="url" class="form-control" id="addBlueMap" name="blue_map_url" placeholder="http://10.0.0.5:8100">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="addState" class="form-label">State</label>
+              <select class="form-select" id="addState" name="state">
+                <option value="online" selected>Online</option>
+                <option value="offline">Offline</option>
+                <option value="planned">Planned</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3 pt-4">
+               <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="addShowMOTD" name="show_motd" checked>
+                <label class="form-check-label" for="addShowMOTD">Show MOTD</label>
+              </div>
+            </div>
           </div>
           <div class="mb-3">
-            <label for="addModpack" class="form-label">Modpack Download URL (Optional)</label>
+            <label for="addBlueMap" class="form-label">BlueMap URL</label>
+            <input type="url" class="form-control" id="addBlueMap" name="blue_map_url">
+          </div>
+          <div class="mb-3">
+            <label for="addModpack" class="form-label">Modpack URL</label>
             <input type="text" class="form-control" id="addModpack" name="modpack_url">
           </div>
           <div class="mb-3">
-            <label class="form-label">Metadata (Extra Info)</label>
+            <label class="form-label">Metadata</label>
             <div id="addMetadataContainer"></div>
             <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addMetadataRow('addMetadataContainer')">+ Add Property</button>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="addEnabled" name="is_enabled" checked>
-            <label class="form-check-label" for="addEnabled">Enabled</label>
           </div>
         </div>
         <div class="modal-footer">
@@ -131,22 +151,35 @@
             <label for="editDescription" class="form-label">Description</label>
             <textarea class="form-control" id="editDescription" name="description" rows="2"></textarea>
           </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="editState" class="form-label">State</label>
+              <select class="form-select" id="editState" name="state">
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+                <option value="planned">Planned</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3 pt-4">
+               <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="editShowMOTD" name="show_motd">
+                <label class="form-check-label" for="editShowMOTD">Show MOTD</label>
+              </div>
+            </div>
+          </div>
           <div class="mb-3">
-            <label for="editBlueMap" class="form-label">BlueMap Backend URL</label>
+            <label for="editBlueMap" class="form-label">BlueMap URL</label>
             <input type="url" class="form-control" id="editBlueMap" name="blue_map_url">
           </div>
           <div class="mb-3">
-            <label for="editModpack" class="form-label">Modpack Download URL</label>
+            <label for="editModpack" class="form-label">Modpack URL</label>
             <input type="text" class="form-control" id="editModpack" name="modpack_url">
           </div>
           <div class="mb-3">
-            <label class="form-label">Metadata (Extra Info)</label>
+            <label class="form-label">Metadata</label>
             <div id="editMetadataContainer"></div>
             <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addMetadataRow('editMetadataContainer')">+ Add Property</button>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="editEnabled" name="is_enabled">
-            <label class="form-check-label" for="editEnabled">Enabled</label>
           </div>
         </div>
         <div class="modal-footer">
@@ -182,7 +215,8 @@
     document.getElementById('editDescription').value = button.getAttribute('data-description');
     document.getElementById('editBlueMap').value = button.getAttribute('data-bluemap');
     document.getElementById('editModpack').value = button.getAttribute('data-modpack');
-    document.getElementById('editEnabled').checked = button.getAttribute('data-enabled') === 'true';
+    document.getElementById('editState').value = button.getAttribute('data-state');
+    document.getElementById('editShowMOTD').checked = button.getAttribute('data-showmotd') === 'true';
 
     // Populate metadata
     const container = document.getElementById('editMetadataContainer');

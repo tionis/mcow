@@ -38,7 +38,7 @@ func main() {
 
 	// 5. Initialize Handlers
 	serverHandler := api.NewServerHandler(store, cfg, cache, authenticator)
-	webHandler := web.NewWebHandler(store, authenticator)
+	webHandler := web.NewWebHandler(store, cfg, authenticator)
 
 	router := mux.NewRouter()
 
@@ -55,6 +55,12 @@ func main() {
 		router.Handle("/admin/servers/add", authenticator.Middleware(http.HandlerFunc(webHandler.HandleServerCreate))).Methods("POST")
 		router.Handle("/admin/servers/update", authenticator.Middleware(http.HandlerFunc(webHandler.HandleServerUpdate))).Methods("POST")
 		router.Handle("/admin/servers/delete", authenticator.Middleware(http.HandlerFunc(webHandler.HandleServerDelete))).Methods("POST")
+		
+		// File Manager Routes
+		router.Handle("/admin/files/{serverName}", authenticator.Middleware(http.HandlerFunc(webHandler.FileManager))).Methods("GET")
+		router.Handle("/admin/files/upload", authenticator.Middleware(http.HandlerFunc(webHandler.HandleFileUpload))).Methods("POST")
+		router.Handle("/admin/files/delete", authenticator.Middleware(http.HandlerFunc(webHandler.HandleFileDelete))).Methods("POST")
+		router.Handle("/admin/files/mkdir", authenticator.Middleware(http.HandlerFunc(webHandler.HandleMkdir))).Methods("POST")
 	}
 
 	// API Routes

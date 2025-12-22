@@ -80,7 +80,7 @@ func (h *ServerHandler) GetServerStatus(w http.ResponseWriter, r *http.Request) 
 	}
 	
 	// If server is disabled, we return an offline status
-	if !server.IsEnabled {
+	if server.State == "offline" {
 		offlineStatus := &mcstatus.ServerStatus{
 			Online:      false,
 			LastUpdated: time.Now(),

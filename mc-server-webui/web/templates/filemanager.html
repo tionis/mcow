@@ -1,0 +1,136 @@
+{{define "title"}}File Manager - {{.Server.Name}}{{end}}
+
+{{define "content"}}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Files: {{.Server.Name}}</li>
+  </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>File Manager: {{.Server.Name}}</h2>
+  <div>
+    <button class="btn btn-success" onclick="openUploadModal('')">Upload to Root</button>
+    <button class="btn btn-secondary" onclick="openMkdirModal('')">New Folder in Root</button>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {{template "fileTree" dict "Item" .Files "ServerName" .Server.Name "Path" ""}}
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/admin/files/upload" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="serverName" value="{{.Server.Name}}">
+        <input type="hidden" name="path" id="uploadPath">
+        <div class="modal-header">
+          <h5 class="modal-title">Upload File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Target: <code id="uploadPathDisplay">/</code></p>
+          <div class="mb-3">
+            <label for="fileInput" class="form-label">Select File</label>
+            <input class="form-control" type="file" id="fileInput" name="file" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Mkdir Modal -->
+<div class="modal fade" id="mkdirModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/admin/files/mkdir" method="POST">
+        <input type="hidden" name="serverName" value="{{.Server.Name}}">
+        <input type="hidden" name="path" id="mkdirPath">
+        <div class="modal-header">
+          <h5 class="modal-title">Create Directory</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Parent: <code id="mkdirPathDisplay">/</code></p>
+          <div class="mb-3">
+            <label for="dirname" class="form-label">Directory Name</label>
+            <input type="text" class="form-control" id="dirname" name="dirname" required pattern="[a-zA-Z0-9_-]+" title="No special characters">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Form -->
+<form id="deleteForm" action="/admin/files/delete" method="POST">
+    <input type="hidden" name="serverName" value="{{.Server.Name}}">
+    <input type="hidden" name="path" id="deletePath">
+</form>
+
+<script>
+function openUploadModal(path) {
+    document.getElementById('uploadPath').value = path;
+    document.getElementById('uploadPathDisplay').innerText = path || '/';
+    new bootstrap.Modal(document.getElementById('uploadModal')).show();
+}
+
+function openMkdirModal(path) {
+    document.getElementById('mkdirPath').value = path;
+    document.getElementById('mkdirPathDisplay').innerText = path || '/';
+    new bootstrap.Modal(document.getElementById('mkdirModal')).show();
+}
+
+function deleteItem(path) {
+    if(confirm('Are you sure you want to delete: ' + path + '?')) {
+        document.getElementById('deletePath').value = path;
+        document.getElementById('deleteForm').submit();
+    }
+}
+</script>
+{{end}}
+
+{{define "fileTree"}}
+<ul class="list-group list-group-flush">
+  {{$serverName := .ServerName}}
+  {{if .Item.Children}}
+    {{range .Item.Children}}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          {{if eq .Type "directory"}}
+            📁 <strong>{{.Name}}</strong>
+          {{else}}
+            📄 {{.Name}} <span class="text-muted ms-2">{{.Size}} B</span>
+          {{end}}
+        </div>
+        <div>
+          {{if eq .Type "directory"}}
+            <button class="btn btn-sm btn-outline-success me-1" onclick="openUploadModal('{{.Path}}')">⬆️</button>
+            <button class="btn btn-sm btn-outline-secondary me-1" onclick="openMkdirModal('{{.Path}}')">➕📁</button>
+          {{end}}
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteItem('{{.Path}}')">🗑️</button>
+        </div>
+      </li>
+      {{if eq .Type "directory"}}
+        <div class="ms-4 border-start ps-2">
+            {{template "fileTree" dict "Item" . "ServerName" $serverName}}
+        </div>
+      {{end}}
+    {{end}}
+  {{else}}
+    <li class="list-group-item text-muted">Empty directory</li>
+  {{end}}
+</ul>
+{{end}}
