@@ -17,7 +17,7 @@
           <div class="server-status-poller h5 mb-0" data-server="{{.Server.Name}}">Checking status...</div>
         </div>
         <h6 class="text-muted">{{.Server.Address}}</h6>
-        <p class="card-text lead">{{.Server.Description}}</p>
+        <p class="card-text lead">{{.Server.Description | nl2br}}</p>
 
         {{if .Server.ModpackURL}}
         <a href="{{.Server.ModpackURL}}" class="btn btn-success mb-3">Download Modpack</a>
@@ -56,6 +56,10 @@
             <strong>{{$k}}</strong> <span>{{$v}}</span>
          </li>
          {{end}}
+         <li class="list-group-item">
+            <strong>Online Players</strong>
+            <div id="player-list-{{.Server.Name}}" class="small mt-1 text-muted">No players online</div>
+         </li>
       </ul>
     </div>
   </div>
