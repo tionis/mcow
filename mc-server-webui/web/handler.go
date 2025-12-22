@@ -6,6 +6,7 @@ import (
 	"mc-server-webui/auth"
 	"mc-server-webui/database"
 	"net/http"
+	"strconv"
 )
 
 //go:embed templates/*.html
@@ -45,11 +46,6 @@ func (h *WebHandler) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute the "base.html" template (which includes "content" from index)
-	// We need to ensure base.html is the entry point or layout.
-	// Actually standard Go template practice is to Execute the layout.
-	// My base.html defines "content" block as empty, and index.html defines it.
-	// So I should Execute "base.html" (or whatever name the file has, typically the filename).
 	if err := tmpl.ExecuteTemplate(w, "base.html", data); err != nil {
 		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
 	}
@@ -82,4 +78,80 @@ func (h *WebHandler) Admin(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.ExecuteTemplate(w, "base.html", data); err != nil {
 		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
 	}
+}
+
+// HandleServerCreate handles the creation of a new server.
+func (h *WebHandler) HandleServerCreate(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	server := &database.Server{
+		Name:        r.FormValue("name"),
+		Address:     r.FormValue("address"),
+		Description: r.FormValue("description"),
+		BlueMapURL:  r.FormValue("blue_map_url"),
+		ModpackURL:  r.FormValue("modpack_url"),
+		IsEnabled:   r.FormValue("is_enabled") == "on",
+	}
+
+	if err := h.Store.CreateServer(server); err != nil {
+		http.Error(w, "Failed to create server: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/admin", http.StatusFound)
+}
+
+// HandleServerUpdate handles updating an existing server.
+func (h *WebHandler) HandleServerUpdate(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(r.FormValue("id"))
+	if err != nil {
+		http.Error(w, "Invalid server ID", http.StatusBadRequest)
+		return
+	}
+
+	server := &database.Server{
+		ID:          id,
+		Name:        r.FormValue("name"),
+		Address:     r.FormValue("address"),
+		Description: r.FormValue("description"),
+		BlueMapURL:  r.FormValue("blue_map_url"),
+		ModpackURL:  r.FormValue("modpack_url"),
+		IsEnabled:   r.FormValue("is_enabled") == "on",
+	}
+
+	if err := h.Store.UpdateServer(server); err != nil {
+		http.Error(w, "Failed to update server: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/admin", http.StatusFound)
+}
+
+// HandleServerDelete handles deleting a server.
+func (h *WebHandler) HandleServerDelete(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(r.FormValue("id"))
+	if err != nil {
+		http.Error(w, "Invalid server ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Store.DeleteServer(id); err != nil {
+		http.Error(w, "Failed to delete server: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/admin", http.StatusFound)
 }

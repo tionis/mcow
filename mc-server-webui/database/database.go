@@ -131,6 +131,53 @@ func (s *Store) GetServerByName(name string) (*Server, error) {
 		}
 		return nil, err
 	}
-	srv.IsEnabled = isEnabled == 1
-	return &srv, nil
-}
+		srv.IsEnabled = isEnabled == 1
+		return &srv, nil
+	}
+	
+	// CreateServer inserts a new server into the database.
+	func (s *Store) CreateServer(srv *Server) error {
+		stmt, err := s.DB.Prepare("INSERT INTO servers (name, address, description, blue_map_url, modpack_url, is_enabled) VALUES (?, ?, ?, ?, ?, ?)")
+		if err != nil {
+			return err
+		}
+		defer stmt.Close()
+	
+		isEnabled := 0
+		if srv.IsEnabled {
+			isEnabled = 1
+		}
+	
+		_, err = stmt.Exec(srv.Name, srv.Address, srv.Description, srv.BlueMapURL, srv.ModpackURL, isEnabled)
+		return err
+	}
+	
+	// UpdateServer updates an existing server in the database.
+	func (s *Store) UpdateServer(srv *Server) error {
+		stmt, err := s.DB.Prepare("UPDATE servers SET name=?, address=?, description=?, blue_map_url=?, modpack_url=?, is_enabled=? WHERE id=?")
+		if err != nil {
+			return err
+		}
+		defer stmt.Close()
+	
+		isEnabled := 0
+		if srv.IsEnabled {
+			isEnabled = 1
+		}
+	
+		_, err = stmt.Exec(srv.Name, srv.Address, srv.Description, srv.BlueMapURL, srv.ModpackURL, isEnabled, srv.ID)
+		return err
+	}
+	
+	// DeleteServer deletes a server from the database by ID.
+	func (s *Store) DeleteServer(id int) error {
+		stmt, err := s.DB.Prepare("DELETE FROM servers WHERE id=?")
+		if err != nil {
+			return err
+		}
+		defer stmt.Close()
+	
+		_, err = stmt.Exec(id)
+		return err
+	}
+	

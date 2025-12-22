@@ -52,6 +52,9 @@ func main() {
 		
 		// Protected Admin Route
 		router.Handle("/admin", authenticator.Middleware(http.HandlerFunc(webHandler.Admin))).Methods("GET")
+		router.Handle("/admin/servers/add", authenticator.Middleware(http.HandlerFunc(webHandler.HandleServerCreate))).Methods("POST")
+		router.Handle("/admin/servers/update", authenticator.Middleware(http.HandlerFunc(webHandler.HandleServerUpdate))).Methods("POST")
+		router.Handle("/admin/servers/delete", authenticator.Middleware(http.HandlerFunc(webHandler.HandleServerDelete))).Methods("POST")
 	}
 
 	// API Routes
