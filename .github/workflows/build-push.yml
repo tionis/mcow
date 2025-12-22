@@ -3,9 +3,6 @@ name: Build and Push Docker Image
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'mc-server-webui/**'
-      - '.github/workflows/build-push.yml'
   workflow_dispatch:
 
 env:
@@ -45,8 +42,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./mc-server-webui
-          file: ./mc-server-webui/Containerfile
+          context: .
+          file: ./Containerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

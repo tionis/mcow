@@ -1,0 +1,13 @@
+# Database
+*.db
+*.sqlite
+
+# Binaries
+mcow
+main
+
+# Data (if local only)
+data/
+
+# OS specific
+.DS_Store
