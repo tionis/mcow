@@ -63,6 +63,9 @@ func main() {
 	router.HandleFunc("/api/servers/{serverName}/mods", serverHandler.GetServerMods).Methods("GET")
 	router.PathPrefix("/{serverName}/map/").HandlerFunc(serverHandler.BlueMapProxy)     // BlueMap Proxy route
 	router.PathPrefix("/files/{serverName}/mods/").Handler(http.HandlerFunc(serverHandler.ServeModFiles)) // Serve static mod files
+	
+	// Server Detail Page (catch-all for server names)
+	router.HandleFunc("/{serverName}", webHandler.ServerDetail).Methods("GET")
 
 	log.Printf("Starting server on :%s", cfg.Port)
 	if err := http.ListenAndServe(":"+cfg.Port, router); err != nil {

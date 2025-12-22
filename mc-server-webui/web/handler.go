@@ -8,6 +8,8 @@ import (
 	"mc-server-webui/database"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 //go:embed templates/*.html
@@ -26,22 +28,74 @@ func NewWebHandler(store *database.Store, auth *auth.Authenticator) *WebHandler 
 
 // Home renders the main server list page.
 func (h *WebHandler) Home(w http.ResponseWriter, r *http.Request) {
-	servers, err := h.Store.ListServers()
+	allServers, err := h.Store.ListServers()
 	if err != nil {
 		http.Error(w, "Failed to load servers", http.StatusInternalServerError)
 		return
+	}
+
+	isAuthenticated := h.Auth != nil && h.Auth.IsAuthenticated(r)
+	
+	// Filter servers
+	var visibleServers []database.Server
+	for _, s := range allServers {
+		if s.IsEnabled || isAuthenticated {
+			visibleServers = append(visibleServers, s)
+		}
 	}
 
 	data := struct {
 		Servers       []database.Server
 		Authenticated bool
 	}{
-		Servers:       servers,
-		Authenticated: h.Auth != nil && h.Auth.IsAuthenticated(r),
+		Servers:       visibleServers,
+		Authenticated: isAuthenticated,
 	}
 
 	// Parse both base and index templates
 	tmpl, err := template.ParseFS(templateFS, "templates/base.html", "templates/index.html")
+	if err != nil {
+		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := tmpl.ExecuteTemplate(w, "base.html", data); err != nil {
+		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// ServerDetail renders the detail page for a specific server.
+func (h *WebHandler) ServerDetail(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	serverName := vars["serverName"]
+
+	server, err := h.Store.GetServerByName(serverName)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	if server == nil {
+		http.Error(w, "Server not found", http.StatusNotFound)
+		return
+	}
+
+	isAuthenticated := h.Auth != nil && h.Auth.IsAuthenticated(r)
+
+	// Access control: if disabled and not admin, return 404
+	if !server.IsEnabled && !isAuthenticated {
+		http.Error(w, "Server not found", http.StatusNotFound)
+		return
+	}
+
+	data := struct {
+		Server        *database.Server
+		Authenticated bool
+	}{
+		Server:        server,
+		Authenticated: isAuthenticated,
+	}
+
+	tmpl, err := template.ParseFS(templateFS, "templates/base.html", "templates/server.html")
 	if err != nil {
 		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
 		return

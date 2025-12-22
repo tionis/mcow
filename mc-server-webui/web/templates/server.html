@@ -1,66 +1,74 @@
-{{define "title"}}Server List{{end}}
+{{define "title"}}{{.Server.Name}} - Details{{end}}
 
 {{define "content"}}
-<div class="row row-cols-1 row-cols-md-2 g-4">
-  {{range .Servers}}
-  <div class="col">
-    <div class="card h-100 shadow-sm server-card">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{.Server.Name}}</li>
+  </ol>
+</nav>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-4 shadow-sm">
       <div class="card-body">
-        <h5 class="card-title d-flex justify-content-between align-items-center">
-          <a href="/{{.Name}}" class="text-decoration-none text-dark">{{.Name}}</a>
-          <span class="badge bg-secondary">{{.Address}}</span>
-        </h5>
-        <h6 class="card-subtitle mb-2 text-muted server-status-poller" data-server="{{.Name}}">
-          Checking status...
-        </h6>
-        <p class="card-text" id="motd-{{.Name}}">{{.Description}}</p>
-        
-        {{if .Metadata}}
-        <div class="mb-3">
-          {{range $k, $v := .Metadata}}
-            <span class="badge bg-light text-dark border me-1 mb-1" title="{{$k}}">{{$k}}: {{$v}}</span>
-          {{end}}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h1 class="card-title mb-0">{{.Server.Name}}</h1>
+          <div class="server-status-poller h5 mb-0" data-server="{{.Server.Name}}">Checking status...</div>
         </div>
+        <h6 class="text-muted">{{.Server.Address}}</h6>
+        <p class="card-text lead">{{.Server.Description}}</p>
+
+        {{if .Server.ModpackURL}}
+        <a href="{{.Server.ModpackURL}}" class="btn btn-success mb-3">Download Modpack</a>
         {{end}}
 
-        <div class="d-grid gap-2 d-md-block">
-          {{if .BlueMapURL}}
-          <a href="/{{.Name}}/map/" target="_blank" class="btn btn-outline-primary">View Map</a>
-          {{end}}
-          
-          <button class="btn btn-outline-info" onclick="loadMods('{{.Name}}')" data-bs-toggle="modal" data-bs-target="#modModal">
-            Mods & Files
-          </button>
+        {{if .Server.BlueMapURL}}
+        <h4 class="mt-4">Live Map</h4>
+        <div class="ratio ratio-16x9 border rounded">
+          <iframe src="/{{.Server.Name}}/map/" title="BlueMap" allowfullscreen></iframe>
         </div>
+        {{end}}
+      </div>
+    </div>
+    
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        File Browser
+      </div>
+      <div class="card-body">
+        <div id="file-browser">Loading files...</div>
       </div>
     </div>
   </div>
-  {{end}}
-</div>
 
-<!-- Mod Modal -->
-<div class="modal fade" id="modModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">File Browser</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        Server Info
       </div>
-      <div class="modal-body">
-        <div id="mod-browser-content">Loading...</div>
-      </div>
+      <ul class="list-group list-group-flush">
+         <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>Address</strong> <span>{{.Server.Address}}</span>
+         </li>
+         {{range $k, $v := .Server.Metadata}}
+         <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>{{$k}}</strong> <span>{{$v}}</span>
+         </li>
+         {{end}}
+      </ul>
     </div>
   </div>
 </div>
 
 <script>
-function loadMods(serverName) {
-  const container = document.getElementById('mod-browser-content');
-  container.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
-  
-  fetch(`/api/servers/${serverName}/mods`)
+document.addEventListener("DOMContentLoaded", function() {
+    const serverName = "{{.Server.Name}}";
+    const container = document.getElementById('file-browser');
+    
+    fetch(`/api/servers/${serverName}/mods`)
     .then(r => {
-        if (!r.ok) throw new Error("No mods found or server error");
+        if (!r.ok) throw new Error("No files found or server error");
         return r.json();
     })
     .then(data => {
@@ -69,12 +77,11 @@ function loadMods(serverName) {
     .catch(e => {
       container.innerHTML = `<div class="alert alert-warning">${e.message}</div>`;
     });
-}
+});
 
+// Reusing the render logic (could be moved to base.html if shared)
 function renderFileTree(item, serverName) {
   let html = '<ul class="list-group list-group-flush">';
-  
-  // If it's the root, just render children
   if (item.path === "") {
      if (!item.children || item.children.length === 0) return "No files found.";
      return renderChildren(item.children, serverName);
@@ -102,8 +109,6 @@ function renderChildren(children, serverName) {
         } else if (child.type === 'url') {
             content = `<a href="${child.url}" target="_blank" class="list-group-item list-group-item-action text-primary">${icon} ${child.name}</a>`;
         } else {
-             // File download link
-             // We need to encode the path parts
              const downloadPath = `/files/${serverName}/mods/${child.path}`;
              content = `<a href="${downloadPath}" target="_blank" class="list-group-item list-group-item-action">${icon} ${child.name} <span class="badge bg-light text-dark float-end">${formatBytes(child.size)}</span></a>`;
         }
