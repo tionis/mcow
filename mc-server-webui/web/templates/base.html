@@ -10,9 +10,9 @@
       :root {
         --glass-bg: rgba(25, 25, 25, 0.85);
         --glass-border: rgba(255, 255, 255, 0.1);
-        --accent-color: #5aa9ff;
-        --text-main: #f0f0f0;
-        --text-muted: #b0b0b0;
+        --accent-color: #66b2ff;
+        --text-main: #ffffff;
+        --text-muted: #cccccc;
       }
 
       body {
@@ -24,7 +24,12 @@
       }
 
       /* Typography */
-      h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -0.5px; }
+      h1, h2, h3, h4, h5, h6 { 
+        font-weight: 700; 
+        letter-spacing: -0.5px; 
+        color: #ffffff !important;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      }
       .navbar-brand { font-family: 'VT323', monospace; font-size: 2rem; letter-spacing: 1px; }
 
       /* Glassmorphism Components */
@@ -44,10 +49,10 @@
       /* Cards */
       .card { transition: transform 0.2s, box-shadow 0.2s; border: 1px solid rgba(255,255,255,0.05); }
       .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.2); }
-      .card-title a { color: #fff; text-decoration: none; }
-      .card-title a:hover { color: var(--accent-color); }
+      .card-title a { color: var(--accent-color) !important; text-decoration: none; font-weight: 700; }
+      .card-title a:hover { color: #99ccff !important; text-decoration: underline; }
       .card-subtitle { color: var(--text-muted) !important; }
-      .card-text { color: #ddd; }
+      .card-text { color: #eee; }
 
       /* Buttons */
       .btn {
@@ -60,15 +65,16 @@
         border: none;
         transition: all 0.2s;
       }
-      .btn-primary { background: linear-gradient(135deg, #007bff, #0056b3); box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4); }
-      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6); }
+      .btn-primary { background: linear-gradient(135deg, #007bff, #0056b3); box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4); color: white; }
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6); color: white; }
       
       .btn-outline-primary { border: 2px solid var(--accent-color); color: var(--accent-color); background: transparent; }
       .btn-outline-primary:hover { background: var(--accent-color); color: #fff; box-shadow: 0 0 15px rgba(90, 169, 255, 0.5); }
 
       /* Tables & Forms */
       .table { color: var(--text-main); border-color: var(--glass-border); }
-      .table-striped > tbody > tr:nth-of-type(odd) > * { background-color: rgba(255,255,255,0.03); color: var(--text-main); }
+      .table-striped > tbody > tr:nth-of-type(odd) > * { background-color: rgba(255,255,255,0.05); color: var(--text-main); }
+      .table > :not(caption) > * > * { color: var(--text-main); }
       
       .form-control {
         background: rgba(0, 0, 0, 0.3);
@@ -78,11 +84,17 @@
       }
       .form-control:focus { background: rgba(0, 0, 0, 0.5); border-color: var(--accent-color); color: #fff; box-shadow: 0 0 0 0.25rem rgba(90, 169, 255, 0.25); }
 
+      /* Lists (File Browser) */
+      .list-group-item { background: transparent; color: #fff; border-color: var(--glass-border); }
+      .list-group-item-action:hover { background-color: rgba(255,255,255,0.1); color: #fff; }
+
       /* Utils */
       .text-muted { color: var(--text-muted) !important; }
       a { color: var(--accent-color); text-decoration: none; }
-      a:hover { color: #8bc4ff; text-decoration: underline; }
-      .breadcrumb-item.active { color: var(--text-muted); }
+      a:hover { color: #99ccff; text-decoration: underline; }
+      .breadcrumb-item { color: var(--text-muted); }
+      .breadcrumb-item.active { color: #fff; }
+      .breadcrumb-item + .breadcrumb-item::before { color: var(--text-muted); }
       
       .badge { font-weight: 600; letter-spacing: 0.5px; padding: 0.5em 0.8em; border-radius: 6px; }
       
