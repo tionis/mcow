@@ -5,118 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{block "title" .}}Minecraft Servers{{end}}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
       :root {
-        --mc-bg: #121212;
-        --mc-card: #1e1e1e;
-        --mc-text: #e0e0e0;
-        --mc-accent: #3b8526; /* Minecraft Green */
-        --mc-border: #333;
+        --mc-grass: #5da732;
+        --mc-dirt: #4d3324;
+        --mc-stone: #313131;
+        --mc-stone-light: #4a4a4a;
+        --mc-gui-btn: #aaaaaa;
+        --mc-gui-btn-hover: #7ea1ff;
+        --mc-text-gold: #ffaa00;
+        --mc-text-green: #55ff55;
       }
+
       body {
-        background-color: var(--mc-bg);
-        color: var(--mc-text);
+        background-color: #1a1a1a;
+        background-image: 
+          linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+          repeating-conic-gradient(#222 0% 25%, #1a1a1a 0% 50%) 50% / 40px 40px;
+        color: #ffffff;
         font-family: 'Inter', sans-serif;
+        min-height: 100vh;
       }
-      h1, h2, h3, h4, h5, h6, .navbar-brand, .badge, .btn {
+
+      h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
         font-family: 'VT323', monospace;
-        letter-spacing: 1px;
         text-transform: uppercase;
+        letter-spacing: 1px;
       }
-      h1 { font-size: 3rem; }
-      h5 { font-size: 1.5rem; }
-      
-      /* Blocky UI */
-      .card, .btn, .form-control, .modal-content, .badge {
-        border-radius: 0 !important;
-      }
-      
-      .card {
-        background-color: var(--mc-card);
-        border: 2px solid var(--mc-border);
-        box-shadow: 4px 4px 0px #000; /* Pixel shadow */
-        transition: transform 0.1s;
-      }
-      .card:hover {
-        transform: translateY(-2px);
-        border-color: #555;
-      }
-      .card-subtitle { color: #aaa !important; }
-      
-      /* Navbar */
+
+      /* Minecraft Navbar */
       .navbar {
-        background-color: #0a0a0a !important;
-        border-bottom: 2px solid #333;
-        box-shadow: 0 4px 0 #000;
-        margin-bottom: 2rem !important;
+        background: var(--mc-dirt) !important;
+        border-top: 10px solid var(--mc-grass);
+        border-bottom: 4px solid #000;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.5);
+        padding: 1rem 0;
       }
       .navbar-brand {
-        font-size: 2rem;
-        color: #fff !important;
+        font-size: 2.5rem;
+        text-shadow: 3px 3px #000;
+        color: var(--mc-text-green) !important;
+      }
+
+      /* Minecraft Buttons */
+      .btn {
+        border-radius: 0;
+        border: 2px solid #000;
+        background: #7c7c7c;
+        box-shadow: inset -4px -4px #373737, inset 4px 4px #c6c6c6;
+        color: #fff;
+        font-size: 1.4rem;
+        transition: none;
         text-shadow: 2px 2px #000;
       }
-      
-      /* Buttons */
-      .btn {
-        border: 2px solid rgba(0,0,0,0.5);
-        box-shadow: inset -2px -2px 0px rgba(0,0,0,0.5);
+      .btn:hover {
+        background: var(--mc-gui-btn-hover);
+        box-shadow: inset -4px -4px #2e468c, inset 4px 4px #a9bdff;
+        color: #fff;
+      }
+      .btn-primary { background: #3b8526; box-shadow: inset -4px -4px #1a3d11, inset 4px 4px #6ab344; }
+      .btn-primary:hover { background: #4ca032; }
+      .btn-danger { background: #a12722; box-shadow: inset -4px -4px #5a1210, inset 4px 4px #d64d4a; }
+
+      /* Cards as Inventory Slots */
+      .card {
+        background: #313131;
+        border: 4px solid #000;
+        box-shadow: inset -4px -4px #1a1a1a, inset 4px 4px #5a5a5a;
+        color: #fff;
+        border-radius: 0;
+        margin-bottom: 20px;
+      }
+      .card-title a {
+        color: var(--mc-text-gold) !important;
+        font-size: 1.8rem;
+        text-shadow: 2px 2px #000;
+      }
+      .card-subtitle {
+        background: #000;
+        padding: 5px 10px;
+        display: inline-block;
+        font-family: 'VT323', monospace;
         font-size: 1.2rem;
-        padding-top: 0.1rem;
-        padding-bottom: 0.1rem;
       }
-      .btn-primary {
-        background-color: #3b8526;
-        border-color: #2a6319;
+      .card-text { font-size: 1.1rem; line-height: 1.6; }
+
+      /* Status Colors */
+      .status-online { color: #55ff55 !important; font-weight: bold; }
+      .status-offline { color: #ff5555 !important; font-weight: bold; }
+
+      .badge {
+        font-family: 'VT323', monospace;
+        font-size: 1rem;
+        border-radius: 0;
+        border: 1px solid #000;
+        padding: 5px 8px;
       }
-      .btn-primary:hover {
-        background-color: #4ca032;
-        box-shadow: inset 2px 2px 0px rgba(255,255,255,0.2);
-      }
-      .btn-outline-primary {
-        color: #5aa9ff;
-        border-color: #5aa9ff;
-      }
-      .btn-outline-primary:hover {
-        background-color: #5aa9ff;
-        color: #000;
-      }
-      
-      /* Forms */
-      .form-control {
-        background-color: #2a2a2a;
-        border: 2px solid #444;
-        color: #fff;
-      }
-      .form-control:focus {
-        background-color: #333;
-        color: #fff;
-        border-color: var(--mc-accent);
-        box-shadow: none;
-      }
-      
-      /* Tables */
-      .table { color: var(--mc-text); }
-      .table-striped > tbody > tr:nth-of-type(odd) > * {
-        background-color: rgba(255,255,255,0.05);
-        color: var(--mc-text);
-      }
-      
-      /* Utils */
-      .text-muted { color: #888 !important; }
-      a { color: #5aa9ff; text-decoration: none; }
-      a:hover { color: #8bc4ff; text-decoration: underline; }
-      .breadcrumb-item.active { color: #aaa; }
-      
-      .status-online { color: #55ff55; text-shadow: 1px 1px #000; }
-      .status-offline { color: #ff5555; text-shadow: 1px 1px #000; }
-      
-      /* Modals */
+
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 12px; }
+      ::-webkit-scrollbar-track { background: #1a1a1a; }
+      ::-webkit-scrollbar-thumb { background: var(--mc-dirt); border: 2px solid #000; }
+
       .modal-content {
-        background-color: #222;
-        border: 2px solid #fff;
+        background: #c6c6c6;
+        border: 4px solid #000;
+        color: #000;
+        box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
       }
-      .btn-close { filter: invert(1); }
+      .modal-header { border-bottom: 2px solid #8b8b8b; }
+      .modal-title { font-size: 2rem; color: #333; text-shadow: none; }
+      .form-control {
+        border-radius: 0;
+        border: 2px solid #8b8b8b;
+        background: #dbdbdb;
+        color: #000;
+        font-weight: bold;
+      }
+      .form-control:focus { background: #fff; border-color: var(--mc-grass); box-shadow: none; }
+      .table { color: #000; }
     </style>
   </head>
   <body>
