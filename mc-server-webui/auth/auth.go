@@ -146,6 +146,16 @@ func (a *Authenticator) IsAuthenticated(r *http.Request) bool {
 	return ok && auth
 }
 
+// GetUserEmail returns the email of the authenticated user.
+func (a *Authenticator) GetUserEmail(r *http.Request) string {
+	session, _ := a.SessionStore.Get(r, "mc-webui-session")
+	email, ok := session.Values["user_email"].(string)
+	if !ok {
+		return ""
+	}
+	return email
+}
+
 func generateRandomState() (string, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)

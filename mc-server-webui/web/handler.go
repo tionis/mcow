@@ -54,3 +54,32 @@ func (h *WebHandler) Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
 	}
 }
+
+// Admin renders the admin dashboard.
+func (h *WebHandler) Admin(w http.ResponseWriter, r *http.Request) {
+	servers, err := h.Store.ListServers()
+	if err != nil {
+		http.Error(w, "Failed to load servers", http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		Servers       []database.Server
+		Authenticated bool
+		UserEmail     string
+	}{
+		Servers:       servers,
+		Authenticated: true, // Admin page is protected, so always true
+		UserEmail:     h.Auth.GetUserEmail(r),
+	}
+
+	tmpl, err := template.ParseFS(templateFS, "templates/base.html", "templates/admin.html")
+	if err != nil {
+		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := tmpl.ExecuteTemplate(w, "base.html", data); err != nil {
+		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
+	}
+}

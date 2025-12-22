@@ -49,6 +49,9 @@ func main() {
 		router.HandleFunc("/login", authenticator.HandleLogin).Methods("GET")
 		router.HandleFunc("/logout", authenticator.HandleLogout).Methods("GET")
 		router.HandleFunc("/auth/callback", authenticator.HandleCallback).Methods("GET")
+		
+		// Protected Admin Route
+		router.Handle("/admin", authenticator.Middleware(http.HandlerFunc(webHandler.Admin))).Methods("GET")
 	}
 
 	// API Routes

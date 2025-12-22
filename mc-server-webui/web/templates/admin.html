@@ -1,0 +1,45 @@
+{{define "title"}}Admin Dashboard{{end}}
+
+{{define "content"}}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Server Management</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Add Server (Coming Soon)</button>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Address</th>
+        <th scope="col">BlueMap URL</th>
+        <th scope="col">Enabled</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Servers}}
+      <tr>
+        <td>{{.ID}}</td>
+        <td>{{.Name}}</td>
+        <td>{{.Address}}</td>
+        <td>{{if .BlueMapURL}}<a href="{{.BlueMapURL}}" target="_blank">Link</a>{{else}}-{{end}}</td>
+        <td>{{if .IsEnabled}}✅{{else}}❌{{end}}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-primary" disabled>Edit</button>
+          <button class="btn btn-sm btn-outline-danger" disabled>Delete</button>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-5">
+  <h3>User Info</h3>
+  <p>Logged in as: <strong>{{.UserEmail}}</strong></p>
+</div>
+{{end}}
