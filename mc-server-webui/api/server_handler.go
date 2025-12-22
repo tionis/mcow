@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"mc-server-webui/auth"
 	"mc-server-webui/config"
 	"mc-server-webui/database"
 	"mc-server-webui/mcstatus"
@@ -23,14 +24,16 @@ type ServerHandler struct {
 	Store  *database.Store
 	Config *config.Config
 	Cache  *mcstatus.ServerStatusCache
+	Auth   *auth.Authenticator
 }
 
 // NewServerHandler creates a new ServerHandler.
-func NewServerHandler(store *database.Store, cfg *config.Config, cache *mcstatus.ServerStatusCache) *ServerHandler {
+func NewServerHandler(store *database.Store, cfg *config.Config, cache *mcstatus.ServerStatusCache, auth *auth.Authenticator) *ServerHandler {
 	return &ServerHandler{
 		Store:  store,
 		Config: cfg,
 		Cache:  cache,
+		Auth:   auth,
 	}
 }
 

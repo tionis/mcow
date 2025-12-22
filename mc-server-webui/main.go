@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"mc-server-webui/api"
+	"mc-server-webui/auth"
 	"mc-server-webui/config"
 	"mc-server-webui/database"
 	"mc-server-webui/mcstatus"
+	"mc-server-webui/web"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -24,12 +26,32 @@ func main() {
 	// 3. Initialize Cache
 	cache := mcstatus.NewServerStatusCache()
 
-	// 4. Initialize API Handler with dependencies
-	serverHandler := api.NewServerHandler(store, cfg, cache)
+	// 4. Initialize Authenticator
+	authenticator, err := auth.NewAuthenticator(cfg)
+	if err != nil {
+		log.Printf("Warning: OIDC authentication could not be initialized: %v", err)
+	} else if authenticator == nil {
+		log.Println("OIDC authentication is disabled (not configured).")
+	} else {
+		log.Println("OIDC authentication initialized.")
+	}
+
+	// 5. Initialize Handlers
+	serverHandler := api.NewServerHandler(store, cfg, cache, authenticator)
+	webHandler := web.NewWebHandler(store, authenticator)
 
 	router := mux.NewRouter()
 
-	// Public API routes
+	// Web Routes
+	router.HandleFunc("/", webHandler.Home).Methods("GET")
+	
+	if authenticator != nil {
+		router.HandleFunc("/login", authenticator.HandleLogin).Methods("GET")
+		router.HandleFunc("/logout", authenticator.HandleLogout).Methods("GET")
+		router.HandleFunc("/auth/callback", authenticator.HandleCallback).Methods("GET")
+	}
+
+	// API Routes
 	router.HandleFunc("/api/servers", serverHandler.GetServers).Methods("GET")
 	router.HandleFunc("/api/servers/{serverName}/status", serverHandler.GetServerStatus).Methods("GET")
 	router.HandleFunc("/api/servers/{serverName}/mods", serverHandler.GetServerMods).Methods("GET")

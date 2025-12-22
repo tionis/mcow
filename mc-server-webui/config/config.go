@@ -10,6 +10,13 @@ type Config struct {
 	DatabasePath   string
 	ModDataPath    string
 	CacheDuration  int // Seconds
+
+	// OIDC Configuration
+	OIDCProviderURL  string
+	OIDCClientID     string
+	OIDCClientSecret string
+	OIDCRedirectURL  string
+	SessionSecret    string
 }
 
 // LoadConfig reads configuration from environment variables or sets defaults.
@@ -18,7 +25,13 @@ func LoadConfig() *Config {
 		Port:           getEnv("PORT", "8080"),
 		DatabasePath:   getEnv("DB_PATH", "./mc-servers.db"),
 		ModDataPath:    getEnv("MOD_DATA_PATH", "data/mods"),
-		CacheDuration:  60, 
+		CacheDuration:  60,
+		
+		OIDCProviderURL:  getEnv("OIDC_PROVIDER_URL", ""),
+		OIDCClientID:     getEnv("OIDC_CLIENT_ID", ""),
+		OIDCClientSecret: getEnv("OIDC_CLIENT_SECRET", ""),
+		OIDCRedirectURL:  getEnv("OIDC_REDIRECT_URL", "http://localhost:8080/auth/callback"),
+		SessionSecret:    getEnv("SESSION_SECRET", "super-secret-key-change-me"),
 	}
 }
 
