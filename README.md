@@ -5,11 +5,12 @@ A modern, high-performance web interface for managing and showcasing IEEE Passau
 ## Features
 
 *   **Real-time Server Status:** Live player counts, version info, and online status using efficient caching (60s TTL).
-*   **Mod File Browser:** Automatically scans and serves mod files, modpacks, and documentation from a structured directory.
+*   **Admin Dashboard:** Complete web-based management interface for adding, editing, and deleting servers without touching the database.
+*   **Mod File Browser:** Automatically scans and serves mod files, modpacks, and documentation from a structured directory. Supports downloading files and directories (as zip), rendering `.md` files, and `.url` redirects.
 *   **BlueMap Proxy:** Securely proxies BlueMap instances (e.g., `http://localhost:8100`) through the main web server, unifying access.
 *   **OIDC Authentication:** Secure login via OpenID Connect (e.g., Keycloak, Google) for administrative access.
 *   **Modern Architecture:**
-    *   **Backend:** Go (1.21+) with `gorilla/mux` and `database/sql`.
+    *   **Backend:** Go (1.24+) with `gorilla/mux` and `database/sql`.
     *   **Database:** SQLite with `golang-migrate` for robust schema management.
     *   **Frontend:** Server-side rendered HTML (Go templates) with Bootstrap 5.
     *   **Config:** 12-factor app design using environment variables.
@@ -18,7 +19,7 @@ A modern, high-performance web interface for managing and showcasing IEEE Passau
 
 ### Prerequisites
 
-*   **Go:** Version 1.21 or higher.
+*   **Go:** Version 1.24 or higher.
 *   **SQLite:** (Optional) For inspecting the database manually.
 *   **GCC:** Required for `go-sqlite3` (CGO).
 
@@ -34,6 +35,13 @@ A modern, high-performance web interface for managing and showcasing IEEE Passau
     ```bash
     go build -o mcow .
     ```
+
+### Docker
+A `Containerfile` is provided for building a container image.
+```bash
+docker build -t mcow .
+docker run -p 8080:8080 -v ./data:/data mcow
+```
 
 ### Running the Application
 
@@ -61,8 +69,17 @@ A modern, high-performance web interface for managing and showcasing IEEE Passau
     ```
 
 3.  Access the UI at `http://localhost:8080`.
+    *   **Admin Login:** Go to `/login` to authenticate via OIDC (if configured).
+    *   **Admin Dashboard:** Go to `/admin` to manage servers.
+
+### Helper Scripts
+The repository includes helper scripts for development/testing:
+*   `go run insert_dummy_data.go`: Populates the database with sample servers.
+*   `go run update_bluemap_url.go`: Example script to update database records programmatically.
 
 ## Configuration Reference
+
+
 
 | Variable             | Default                         | Description                                                                 |
 | -------------------- | ------------------------------- | --------------------------------------------------------------------------- |
@@ -77,16 +94,26 @@ A modern, high-performance web interface for managing and showcasing IEEE Passau
 
 ## Usage Guide
 
-### 1. Adding Servers
-Currently, servers are managed via direct database insertion (Admin UI coming soon).
-To add a server manually:
-```bash
-sqlite3 mcow.db "INSERT INTO servers (name, address, description, blue_map_url, is_enabled) VALUES ('Creative', 'mc.example.com:25565', 'Our creative world', 'http://map-host:8100', 1);"
-```
+### 1. Managing Servers
+Servers are managed via the web-based Admin Dashboard at `/admin`.
+1.  **Log in:** Authenticate via OIDC to access the dashboard.
+2.  **Add/Edit:** Use the interface to configure server details:
+    *   **Name:** Unique identifier (used in URLs and file paths).
+    *   **Address:** The Minecraft server address (e.g., `mc.example.com`).
+    *   **State:** Controls visibility (`online`, `offline`, `planned`, `maintenance`).
+    *   **BlueMap URL:** Internal URL for proxying (e.g., `http://localhost:8100`).
+    *   **Modpack URL:** Optional direct download link.
+    *   **Metadata:** Custom key-value pairs for additional info.
 
-### 2. Organizing Mod Files
+### 2. Managing Files
+You can manage mod files via the **Admin File Manager** or directly on the filesystem.
+
+#### Via File Manager
+Click "Files" on any server in the Admin Dashboard to upload, delete, or organize files directly from the browser.
+
+#### Manual Organization
 The application serves files from `MOD_DATA_PATH` (default: `data/mods`).
-Create a directory matching the **exact server name** (case-sensitive) from the database:
+Directory structure must match the **server name**:
 
 ```text
 data/mods/
@@ -101,18 +128,15 @@ data/mods/
     └── ...
 ```
 
-*   **`.md` files:** The content is read and sent to the frontend (rendering support in UI to be added).
-*   **`.url` files:** Contain a single line with a URL. The UI renders these as external links.
+*   **`.md` files:** Content is displayed in the file browser.
+*   **`.url` files:** Rendered as external links.
 *   **Other files:** Served as direct downloads.
 
 ### 3. BlueMap Proxy
 To enable the map proxy:
 1.  Ensure your BlueMap backend is running (e.g., internal IP `10.0.0.5:8100`).
-2.  Update the server record in the database:
-    ```sql
-    UPDATE servers SET blue_map_url = 'http://10.0.0.5:8100' WHERE name = 'Creative';
-    ```
-3.  The map will be accessible at `http://localhost:8080/Creative/map/`.
+2.  In the Admin Dashboard, set the **BlueMap URL** for the server to `http://10.0.0.5:8100`.
+3.  The map will be accessible publicly at `http://your-site.com/Creative/map/`.
 
 ## Architecture
 
@@ -127,7 +151,17 @@ To enable the map proxy:
 *   **`modmanager/`**: Secure filesystem scanning for mod files.
 *   **`config/`**: Environment variable loading.
 
+## API Reference
+
+The application exposes several JSON endpoints:
+
+*   `GET /api/servers`: Returns a list of all visible servers.
+*   `GET /api/servers/{serverName}/status`: Returns real-time status (online/offline, players) for a server.
+*   `GET /api/servers/{serverName}/mods`: Returns the file tree of mods for a server.
+*   `GET /files/{serverName}/mods/...`: Downloads a file directly.
+
 ## Development
+
 
 ### Running Migrations
 Migrations run automatically on startup. To add a new migration:
@@ -135,6 +169,16 @@ Migrations run automatically on startup. To add a new migration:
     *   `XXXXXX_description.up.sql`
     *   `XXXXXX_description.down.sql`
 2.  Rebuild the application (migrations are embedded).
+
+### Running Tests
+To run the test suite:
+```bash
+go test ./...
+```
+To run tests with coverage:
+```bash
+go test -cover ./...
+```
 
 ### License
 [MIT License](LICENSE)
