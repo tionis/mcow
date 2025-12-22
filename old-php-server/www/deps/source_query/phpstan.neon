@@ -1,0 +1,18 @@
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+parameters:
+	checkFunctionNameCase: true
+	level: max
+	paths:
+		- .
+	excludePaths:
+		- vendor
+	strictRules:
+		booleansInConditions: false
+	ignoreErrors:
+		- identifier: missingType.iterableValue
+		  path: Tests/Tests.php
+		- identifier: cast.int
+		  path: SourceQuery/Buffer.php
+		- identifier: cast.double
+		  path: SourceQuery/Buffer.php
