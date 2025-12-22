@@ -82,10 +82,17 @@
         border-color: var(--glass-border); 
         background-color: rgba(0, 0, 0, 0.6); 
         margin-bottom: 0;
+        --bs-table-striped-bg: rgba(0,0,0,0.3); /* Bootstrap override */
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--text-main);
       }
       .table th { color: #fff; border-bottom: 2px solid var(--glass-border); background-color: rgba(0,0,0,0.8); }
       .table td { color: #ddd; vertical-align: middle; }
-      .table-striped > tbody > tr:nth-of-type(odd) > * { background-color: rgba(0,0,0,0.3); color: var(--text-main); }
+      .table-striped > tbody > tr:nth-of-type(odd) > * { 
+        background-color: rgba(0,0,0,0.3) !important; 
+        color: var(--text-main) !important; 
+        box-shadow: none !important; 
+      }
       .table > :not(caption) > * > * { color: var(--text-main); }
       
       .form-control {
