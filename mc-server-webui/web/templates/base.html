@@ -5,12 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{block "title" .}}Minecraft Servers{{end}}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-      body { background-color: #f8f9fa; }
-      .server-card { transition: transform 0.2s; }
-      .server-card:hover { transform: translateY(-5px); }
-      .status-online { color: #198754; font-weight: bold; }
-      .status-offline { color: #dc3545; font-weight: bold; }
+      :root {
+        --mc-bg: #121212;
+        --mc-card: #1e1e1e;
+        --mc-text: #e0e0e0;
+        --mc-accent: #3b8526; /* Minecraft Green */
+        --mc-border: #333;
+      }
+      body {
+        background-color: var(--mc-bg);
+        color: var(--mc-text);
+        font-family: 'Inter', sans-serif;
+      }
+      h1, h2, h3, h4, h5, h6, .navbar-brand, .badge, .btn {
+        font-family: 'VT323', monospace;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+      h1 { font-size: 3rem; }
+      h5 { font-size: 1.5rem; }
+      
+      /* Blocky UI */
+      .card, .btn, .form-control, .modal-content, .badge {
+        border-radius: 0 !important;
+      }
+      
+      .card {
+        background-color: var(--mc-card);
+        border: 2px solid var(--mc-border);
+        box-shadow: 4px 4px 0px #000; /* Pixel shadow */
+        transition: transform 0.1s;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: #555;
+      }
+      .card-subtitle { color: #aaa !important; }
+      
+      /* Navbar */
+      .navbar {
+        background-color: #0a0a0a !important;
+        border-bottom: 2px solid #333;
+        box-shadow: 0 4px 0 #000;
+        margin-bottom: 2rem !important;
+      }
+      .navbar-brand {
+        font-size: 2rem;
+        color: #fff !important;
+        text-shadow: 2px 2px #000;
+      }
+      
+      /* Buttons */
+      .btn {
+        border: 2px solid rgba(0,0,0,0.5);
+        box-shadow: inset -2px -2px 0px rgba(0,0,0,0.5);
+        font-size: 1.2rem;
+        padding-top: 0.1rem;
+        padding-bottom: 0.1rem;
+      }
+      .btn-primary {
+        background-color: #3b8526;
+        border-color: #2a6319;
+      }
+      .btn-primary:hover {
+        background-color: #4ca032;
+        box-shadow: inset 2px 2px 0px rgba(255,255,255,0.2);
+      }
+      .btn-outline-primary {
+        color: #5aa9ff;
+        border-color: #5aa9ff;
+      }
+      .btn-outline-primary:hover {
+        background-color: #5aa9ff;
+        color: #000;
+      }
+      
+      /* Forms */
+      .form-control {
+        background-color: #2a2a2a;
+        border: 2px solid #444;
+        color: #fff;
+      }
+      .form-control:focus {
+        background-color: #333;
+        color: #fff;
+        border-color: var(--mc-accent);
+        box-shadow: none;
+      }
+      
+      /* Tables */
+      .table { color: var(--mc-text); }
+      .table-striped > tbody > tr:nth-of-type(odd) > * {
+        background-color: rgba(255,255,255,0.05);
+        color: var(--mc-text);
+      }
+      
+      /* Utils */
+      .text-muted { color: #888 !important; }
+      a { color: #5aa9ff; text-decoration: none; }
+      a:hover { color: #8bc4ff; text-decoration: underline; }
+      .breadcrumb-item.active { color: #aaa; }
+      
+      .status-online { color: #55ff55; text-shadow: 1px 1px #000; }
+      .status-offline { color: #ff5555; text-shadow: 1px 1px #000; }
+      
+      /* Modals */
+      .modal-content {
+        background-color: #222;
+        border: 2px solid #fff;
+      }
+      .btn-close { filter: invert(1); }
     </style>
   </head>
   <body>
