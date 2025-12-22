@@ -44,7 +44,13 @@
             .then(data => {
               if (data.online) {
                 el.innerHTML = `<span class="status-online">Online</span> - ${data.players}/${data.maxPlayers} Players`;
-                if(data.motd) document.getElementById(`motd-${serverName}`).innerText = data.motd;
+                if(data.motd) {
+                  const motdEl = document.getElementById(`live-motd-${serverName}`);
+                  if (motdEl) {
+                    motdEl.innerText = data.motd;
+                    motdEl.style.display = 'block';
+                  }
+                }
               } else {
                 el.innerHTML = `<span class="status-offline">Offline</span>`;
               }

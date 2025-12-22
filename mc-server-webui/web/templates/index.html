@@ -13,8 +13,13 @@
         <h6 class="card-subtitle mb-2 text-muted server-status-poller" data-server="{{.Name}}">
           Checking status...
         </h6>
-        <p class="card-text" id="motd-{{.Name}}">{{.Description}}</p>
         
+        <!-- Configurable Tagline -->
+        <p class="card-text">{{.Description}}</p>
+        
+        <!-- Live MOTD (Less emphasis) -->
+        <p class="card-text small text-muted font-monospace border-start ps-2" style="display: none;" id="live-motd-{{.Name}}"></p>
+
         {{if .Metadata}}
         <div class="mb-3">
           {{range $k, $v := .Metadata}}

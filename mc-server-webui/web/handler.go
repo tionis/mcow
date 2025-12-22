@@ -39,7 +39,7 @@ func (h *WebHandler) Home(w http.ResponseWriter, r *http.Request) {
 	// Filter servers
 	var visibleServers []database.Server
 	for _, s := range allServers {
-		if s.IsEnabled || isAuthenticated {
+		if s.IsEnabled {
 			visibleServers = append(visibleServers, s)
 		}
 	}
