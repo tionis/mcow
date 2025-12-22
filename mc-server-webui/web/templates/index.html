@@ -4,10 +4,10 @@
 <div class="row row-cols-1 row-cols-md-2 g-4">
   {{range .Servers}}
   <div class="col">
-    <div class="card h-100 shadow-sm server-card">
+    <div class="card h-100 shadow-sm server-card position-relative">
       <div class="card-body">
         <h5 class="card-title d-flex justify-content-between align-items-center">
-          <a href="/{{.Name}}" class="text-decoration-none text-dark">{{.Name}}</a>
+          <a href="/{{.Name}}" class="text-decoration-none text-dark stretched-link">{{.Name}}</a>
           <span class="badge bg-secondary">{{.Address}}</span>
         </h5>
         <h6 class="card-subtitle mb-2 text-muted server-status-poller" data-server="{{.Name}}">
@@ -15,10 +15,13 @@
         </h6>
         
         <!-- Configurable Tagline -->
-        <p class="card-text">{{.Description}}</p>
+        <p class="card-text">{{.Description | firstLine}}</p>
         
         <!-- Live MOTD (Less emphasis) -->
         <p class="card-text small text-muted font-monospace border-start ps-2" style="display: none;" id="live-motd-{{.Name}}"></p>
+
+        <!-- Player List -->
+        <div id="player-list-{{.Name}}" class="mb-3 small"></div>
 
         {{if .Metadata}}
         <div class="mb-3">
@@ -28,14 +31,10 @@
         </div>
         {{end}}
 
-        <div class="d-grid gap-2 d-md-block">
+        <div class="d-grid gap-2 d-md-block position-relative" style="z-index: 2;">
           {{if .BlueMapURL}}
           <a href="/{{.Name}}/map/" target="_blank" class="btn btn-outline-primary">View Map</a>
           {{end}}
-          
-          <button class="btn btn-outline-info" onclick="loadMods('{{.Name}}')" data-bs-toggle="modal" data-bs-target="#modModal">
-            Mods & Files
-          </button>
         </div>
       </div>
     </div>
@@ -43,88 +42,4 @@
   {{end}}
 </div>
 
-<!-- Mod Modal -->
-<div class="modal fade" id="modModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">File Browser</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="mod-browser-content">Loading...</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-function loadMods(serverName) {
-  const container = document.getElementById('mod-browser-content');
-  container.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
-  
-  fetch(`/api/servers/${serverName}/mods`)
-    .then(r => {
-        if (!r.ok) throw new Error("No mods found or server error");
-        return r.json();
-    })
-    .then(data => {
-      container.innerHTML = renderFileTree(data, serverName);
-    })
-    .catch(e => {
-      container.innerHTML = `<div class="alert alert-warning">${e.message}</div>`;
-    });
-}
-
-function renderFileTree(item, serverName) {
-  let html = '<ul class="list-group list-group-flush">';
-  
-  // If it's the root, just render children
-  if (item.path === "") {
-     if (!item.children || item.children.length === 0) return "No files found.";
-     return renderChildren(item.children, serverName);
-  }
-  return "Error: Root expected";
-}
-
-function renderChildren(children, serverName) {
-    let html = '<ul class="list-group">';
-    children.forEach(child => {
-        let icon = child.type === 'directory' ? '📁' : '📄';
-        if (child.type === 'url') icon = '🔗';
-        
-        let content = '';
-        if (child.type === 'directory') {
-            content = `
-            <details>
-                <summary class="list-group-item list-group-item-action">
-                    ${icon} ${child.name}
-                </summary>
-                <div class="ms-4">
-                    ${child.children ? renderChildren(child.children, serverName) : ''}
-                </div>
-            </details>`;
-        } else if (child.type === 'url') {
-            content = `<a href="${child.url}" target="_blank" class="list-group-item list-group-item-action text-primary">${icon} ${child.name}</a>`;
-        } else {
-             // File download link
-             // We need to encode the path parts
-             const downloadPath = `/files/${serverName}/mods/${child.path}`;
-             content = `<a href="${downloadPath}" target="_blank" class="list-group-item list-group-item-action">${icon} ${child.name} <span class="badge bg-light text-dark float-end">${formatBytes(child.size)}</span></a>`;
-        }
-        html += content;
-    });
-    html += '</ul>';
-    return html;
-}
-
-function formatBytes(bytes, decimals = 2) {
-    if (!+bytes) return '0 Bytes';
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-}
-</script>
 {{end}}

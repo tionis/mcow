@@ -51,6 +51,13 @@
                     motdEl.style.display = 'block';
                   }
                 }
+                if(data.samplePlayers && data.samplePlayers.length > 0) {
+                    const playerListEl = document.getElementById(`player-list-${serverName}`);
+                    if(playerListEl) {
+                        const names = data.samplePlayers.map(p => p.name).join(', ');
+                        playerListEl.innerHTML = `<strong>Online:</strong> ${names}`;
+                    }
+                }
               } else {
                 el.innerHTML = `<span class="status-offline">Offline</span>`;
               }

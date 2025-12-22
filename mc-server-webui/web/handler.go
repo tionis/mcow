@@ -8,6 +8,7 @@ import (
 	"mc-server-webui/database"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -52,14 +53,27 @@ func (h *WebHandler) Home(w http.ResponseWriter, r *http.Request) {
 		Authenticated: isAuthenticated,
 	}
 
+	funcMap := template.FuncMap{
+		"json": func(v interface{}) string {
+			b, _ := json.Marshal(v)
+			return string(b)
+		},
+		"firstLine": func(s string) string {
+			if idx := strings.Index(s, "\n"); idx != -1 {
+				return s[:idx]
+			}
+			return s
+		},
+	}
+
 	// Parse both base and index templates
-	tmpl, err := template.ParseFS(templateFS, "templates/base.html", "templates/index.html")
+	tmpl, err := template.New("base.html").Funcs(funcMap).ParseFS(templateFS, "templates/base.html", "templates/index.html")
 	if err != nil {
 		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "base.html", data); err != nil {
+	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -95,13 +109,28 @@ func (h *WebHandler) ServerDetail(w http.ResponseWriter, r *http.Request) {
 		Authenticated: isAuthenticated,
 	}
 
-	tmpl, err := template.ParseFS(templateFS, "templates/base.html", "templates/server.html")
+	// Helper functions needed for base.html if it uses them, but usually only page-specific
+	// Adding json and firstLine to be safe
+	funcMap := template.FuncMap{
+		"json": func(v interface{}) string {
+			b, _ := json.Marshal(v)
+			return string(b)
+		},
+		"firstLine": func(s string) string {
+			if idx := strings.Index(s, "\n"); idx != -1 {
+				return s[:idx]
+			}
+			return s
+		},
+	}
+
+	tmpl, err := template.New("base.html").Funcs(funcMap).ParseFS(templateFS, "templates/base.html", "templates/server.html")
 	if err != nil {
 		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "base.html", data); err != nil {
+	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -128,6 +157,12 @@ func (h *WebHandler) Admin(w http.ResponseWriter, r *http.Request) {
 		"json": func(v interface{}) string {
 			b, _ := json.Marshal(v)
 			return string(b)
+		},
+		"firstLine": func(s string) string {
+			if idx := strings.Index(s, "\n"); idx != -1 {
+				return s[:idx]
+			}
+			return s
 		},
 	}
 

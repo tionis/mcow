@@ -12,17 +12,24 @@ import (
 	"github.com/mcstatus-io/mcutil/v4/status"
 )
 
+// Player represents a player on the server.
+type Player struct {
+	Name string `json:"name"`
+	ID   string `json:"id,omitempty"`
+}
+
 // ServerStatus represents the simplified status of a Minecraft server.
 type ServerStatus struct {
-	Online      bool   `json:"online"`
-	MOTD        string `json:"motd,omitempty"`
-	Players     int    `json:"players"`    // Removed omitempty
-	MaxPlayers  int    `json:"maxPlayers"` // Removed omitempty
-	Version     string `json:"version,omitempty"`
-	Protocol    int    `json:"protocol,omitempty"`
-	Favicon     string `json:"favicon,omitempty"`
-	LastUpdated time.Time `json:"lastUpdated"`
-	Error       string `json:"error,omitempty"`
+	Online        bool      `json:"online"`
+	MOTD          string    `json:"motd,omitempty"`
+	Players       int       `json:"players"`    // Removed omitempty
+	MaxPlayers    int       `json:"maxPlayers"` // Removed omitempty
+	SamplePlayers []Player  `json:"samplePlayers,omitempty"`
+	Version       string    `json:"version,omitempty"`
+	Protocol      int       `json:"protocol,omitempty"`
+	Favicon       string    `json:"favicon,omitempty"`
+	LastUpdated   time.Time `json:"lastUpdated"`
+	Error         string    `json:"error,omitempty"`
 }
 
 // QueryMinecraftServer queries a Minecraft server and returns its status.
@@ -61,27 +68,40 @@ func QueryMinecraftServer(server *database.Server) (*ServerStatus, error) {
 		LastUpdated: time.Now(),
 	}
 
-	response, err := status.Modern(ctx, host, port)
+	res, err := status.Modern(ctx, host, port)
 	if err != nil {
 		serverStatus.Error = err.Error()
 		return serverStatus, fmt.Errorf("failed to query server: %w", err)
 	}
 
 	serverStatus.Online = true
-	serverStatus.MOTD = response.MOTD.Clean 
+	serverStatus.MOTD = res.MOTD.Clean 
 	
-	if response.Players.Online != nil {
-		serverStatus.Players = int(*response.Players.Online)
+	if res.Players.Online != nil {
+		serverStatus.Players = int(*res.Players.Online)
 	}
-	if response.Players.Max != nil {
-		serverStatus.MaxPlayers = int(*response.Players.Max)
+	if res.Players.Max != nil {
+		serverStatus.MaxPlayers = int(*res.Players.Max)
 	}
 	
-	serverStatus.Version = response.Version.Name.Clean
-	serverStatus.Protocol = int(response.Version.Protocol)
+	if res.Players.Sample != nil {
+		for _, p := range res.Players.Sample {
+			var name, id string
+			if p.Name.Clean != "" {
+				name = p.Name.Clean
+			}
+			if p.ID != "" {
+				id = p.ID
+			}
+			serverStatus.SamplePlayers = append(serverStatus.SamplePlayers, Player{Name: name, ID: id})
+		}
+	}
+	
+	serverStatus.Version = res.Version.Name.Clean
+	serverStatus.Protocol = int(res.Version.Protocol)
 
-	if response.Favicon != nil {
-		serverStatus.Favicon = *response.Favicon
+	if res.Favicon != nil {
+		serverStatus.Favicon = *res.Favicon
 	}
 
 	return serverStatus, nil
