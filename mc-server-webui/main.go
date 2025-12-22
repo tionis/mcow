@@ -69,6 +69,7 @@ func main() {
 	router.HandleFunc("/api/servers/{serverName}/mods", serverHandler.GetServerMods).Methods("GET")
 	router.PathPrefix("/{serverName}/map/").HandlerFunc(serverHandler.BlueMapProxy)     // BlueMap Proxy route
 	router.PathPrefix("/files/{serverName}/mods/").Handler(http.HandlerFunc(serverHandler.ServeModFiles)) // Serve static mod files
+	router.PathPrefix("/assets/").Handler(http.HandlerFunc(webHandler.ServeAssets)) // Static Assets
 	
 	// Server Detail Page (catch-all for server names)
 	router.HandleFunc("/{serverName}", webHandler.ServerDetail).Methods("GET")

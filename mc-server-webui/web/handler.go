@@ -19,7 +19,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//go:embed templates/*.html
+//go:embed templates/*.html assets/*
 var templateFS embed.FS
 
 // WebHandler handles frontend requests.
@@ -181,6 +181,14 @@ func (h *WebHandler) HandleMkdir(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/admin/files/"+serverName, http.StatusFound)
+}
+
+// ServeAssets serves static assets embedded in the binary.
+func (h *WebHandler) ServeAssets(w http.ResponseWriter, r *http.Request) {
+	// The embed FS root contains "assets" directory.
+	// We want /assets/background.jpg to map to assets/background.jpg
+	// So we serve the root of templateFS.
+	http.FileServer(http.FS(templateFS)).ServeHTTP(w, r)
 }
 
 func isValidPath(serverName, path string) bool {
