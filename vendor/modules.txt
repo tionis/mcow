@@ -1,0 +1,42 @@
+# github.com/coreos/go-oidc/v3 v3.17.0
+## explicit; go 1.24.0
+github.com/coreos/go-oidc/v3/oidc
+# github.com/go-jose/go-jose/v4 v4.1.3
+## explicit; go 1.24.0
+github.com/go-jose/go-jose/v4
+github.com/go-jose/go-jose/v4/cipher
+github.com/go-jose/go-jose/v4/json
+# github.com/golang-migrate/migrate/v4 v4.19.1
+## explicit; go 1.24.0
+github.com/golang-migrate/migrate/v4
+github.com/golang-migrate/migrate/v4/database
+github.com/golang-migrate/migrate/v4/database/sqlite3
+github.com/golang-migrate/migrate/v4/internal/url
+github.com/golang-migrate/migrate/v4/source
+github.com/golang-migrate/migrate/v4/source/iofs
+# github.com/gorilla/mux v1.8.1
+## explicit; go 1.20
+github.com/gorilla/mux
+# github.com/gorilla/securecookie v1.1.2
+## explicit; go 1.20
+github.com/gorilla/securecookie
+# github.com/gorilla/sessions v1.4.0
+## explicit; go 1.23
+github.com/gorilla/sessions
+# github.com/mattn/go-sqlite3 v1.14.32
+## explicit; go 1.19
+github.com/mattn/go-sqlite3
+# github.com/mcstatus-io/mcutil/v4 v4.0.1
+## explicit; go 1.18
+github.com/mcstatus-io/mcutil/v4/formatting
+github.com/mcstatus-io/mcutil/v4/formatting/colors
+github.com/mcstatus-io/mcutil/v4/formatting/decorators
+github.com/mcstatus-io/mcutil/v4/options
+github.com/mcstatus-io/mcutil/v4/proto
+github.com/mcstatus-io/mcutil/v4/response
+github.com/mcstatus-io/mcutil/v4/status
+github.com/mcstatus-io/mcutil/v4/util
+# golang.org/x/oauth2 v0.34.0
+## explicit; go 1.24.0
+golang.org/x/oauth2
+golang.org/x/oauth2/internal

@@ -6,10 +6,6 @@ RUN apk add --no-cache build-base
 
 WORKDIR /app
 
-# Cache dependencies
-COPY go.mod go.sum ./
-RUN go mod download
-
 # Build the application
 COPY . .
 # -ldflags="-w -s" strips debug information for smaller binary
