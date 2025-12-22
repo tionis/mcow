@@ -13,6 +13,7 @@
             {{if eq .State "planned"}}<span class="badge bg-info text-dark me-1">Planned</span>{{end}}
             {{if eq .State "maintenance"}}<span class="badge bg-warning text-dark me-1">Maintenance</span>{{end}}
             {{if eq .State "offline"}}<span class="badge bg-danger me-1">Offline</span>{{end}}
+            {{if eq .State "auto"}}<span class="badge bg-secondary me-1" id="status-badge-{{.Name}}">Checking...</span>{{end}}
             <span class="badge bg-secondary">{{.Address}}</span>
           </div>
         </h5>

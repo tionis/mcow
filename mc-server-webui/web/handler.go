@@ -220,6 +220,8 @@ func (h *WebHandler) Home(w http.ResponseWriter, r *http.Request) {
 	// Filter servers
 	var visibleServers []database.Server
 	for _, s := range allServers {
+		// "offline" state hides the server from public view.
+		// "auto" state shows it, and the frontend determines the badge status.
 		if s.State != "offline" || isAuthenticated {
 			visibleServers = append(visibleServers, s)
 		}
