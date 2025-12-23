@@ -36,11 +36,32 @@ A modern, high-performance web interface for managing and showcasing IEEE Passau
     go build -o mcow .
     ```
 
-### Docker
-A `Containerfile` is provided for building a container image.
+### Containers (Docker/Podman)
+
+#### Pre-built Image
+We automatically build a container image for the `main` branch, available at `ghcr.io/tionis/mcow:latest`.
+
+#### Run with Podman
+Here is an example of how to run the application using Podman, persisting data and mods:
+
 ```bash
-docker build -t mcow .
-docker run -p 8080:8080 -v ./data:/data mcow
+podman run -d --name mcow \
+    -p 8080:8080 \
+    -v ./data:/data \
+    -v ./mods:/app/data/mods \
+    -e SESSION_SECRET="change-this-to-a-long-random-string" \
+    -e OIDC_PROVIDER_URL="" \
+    -e OIDC_CLIENT_ID="" \
+    -e OIDC_CLIENT_SECRET="" \
+    ghcr.io/tionis/mcow:latest
+```
+*Note: Refer to the [Configuration Reference](#configuration-reference) below for OIDC details required for admin access.*
+
+#### Build Manually
+A `Containerfile` is provided for building a container image manually:
+```bash
+podman build -t mcow .
+podman run -p 8080:8080 -v ./data:/data mcow
 ```
 
 ### Running the Application
