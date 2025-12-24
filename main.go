@@ -61,6 +61,17 @@ func main() {
 		router.Handle("/admin/files/upload", authenticator.Middleware(http.HandlerFunc(webHandler.HandleFileUpload))).Methods("POST")
 		router.Handle("/admin/files/delete", authenticator.Middleware(http.HandlerFunc(webHandler.HandleFileDelete))).Methods("POST")
 		router.Handle("/admin/files/mkdir", authenticator.Middleware(http.HandlerFunc(webHandler.HandleMkdir))).Methods("POST")
+	} else {
+		// Register placeholder routes when OIDC is disabled to prevent them from matching /{serverName}
+		router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+			http.Error(w, "Authentication is not configured", http.StatusServiceUnavailable)
+		}).Methods("GET")
+		router.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "/", http.StatusFound)
+		}).Methods("GET")
+		router.HandleFunc("/admin", func(w http.ResponseWriter, r *http.Request) {
+			http.Error(w, "Authentication is not configured", http.StatusServiceUnavailable)
+		}).Methods("GET")
 	}
 
 	// API Routes
